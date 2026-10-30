@@ -18,6 +18,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
       - name: Build APK
         uses: digreatbrian/buildozer-action@v2
         with:
@@ -30,4 +36,4 @@ jobs:
         with:
           name: Video-Downloader-APK
           path: bin/*.apk
-
+          if-no-files-found: error
