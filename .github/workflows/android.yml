@@ -1,3 +1,4 @@
+
 name: Video Downloader APK
 
 on:
@@ -17,18 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
       - name: Build APK
         uses: digreatbrian/buildozer-action@v1
         with:
           workdir: .
-          buildozer_version: stable
-          command: buildozer android debug
+          buildozer-cmd: android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
