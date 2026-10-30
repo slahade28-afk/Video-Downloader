@@ -1,3 +1,4 @@
+
 from kivy.app import App
 from kivy.metrics import dp, sp
 from kivy.uix.boxlayout import BoxLayout
@@ -5,15 +6,14 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
-from kivy.uix.spinner import Spinner
-from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
+from kivy.uix.popup import Popup
 from kivy.core.window import Window
 
-Window.clearcolor = (0.035, 0.035, 0.075, 1)
+Window.clearcolor = (0.025, 0.025, 0.055, 1)
 
 PURPLE = (0.48, 0.20, 0.95, 1)
-DARK = (0.075, 0.075, 0.14, 1)
+DARK = (0.09, 0.09, 0.16, 1)
 WHITE = (1, 1, 1, 1)
 GREY = (0.65, 0.65, 0.75, 1)
 
@@ -21,12 +21,14 @@ GREY = (0.65, 0.65, 0.75, 1)
 class VideoDownloader(App):
 
     def build(self):
-        self.title = "Video Downloader"
+        self.title = "Music Video Player"
+        self.current_mode = "VIDEO"
+        self.current_song = "कोणतेही गाणे निवडलेले नाही"
 
-        self.root_box = BoxLayout(
+        root = BoxLayout(
             orientation="vertical",
-            padding=dp(15),
-            spacing=dp(12)
+            padding=dp(12),
+            spacing=dp(10)
         )
 
         # Header
@@ -37,268 +39,292 @@ class VideoDownloader(App):
 
         menu = Button(
             text="☰",
-            font_size=sp(27),
             size_hint_x=None,
-            width=dp(55),
+            width=dp(50),
+            font_size=sp(25),
             background_normal="",
             background_color=DARK
         )
         menu.bind(on_press=self.open_menu)
 
         title = Label(
-            text="[b]VIDEO DOWNLOADER[/b]",
+            text="[b]MUSIC HUB[/b]",
             markup=True,
-            font_size=sp(20),
+            font_size=sp(23),
             color=WHITE
         )
 
         header.add_widget(menu)
         header.add_widget(title)
-        self.root_box.add_widget(header)
+        root.add_widget(header)
 
-        # Subtitle
-        self.root_box.add_widget(Label(
-            text="Download • Convert • Enjoy",
-            color=GREY,
+        # Search
+        self.search = TextInput(
+            hint_text="गाणे किंवा कलाकार शोधा...",
             size_hint_y=None,
-            height=dp(25)
-        ))
-
-        scroll = ScrollView()
-
-        content = BoxLayout(
-            orientation="vertical",
-            spacing=dp(14),
-            size_hint_y=None
-        )
-        content.bind(minimum_height=content.setter("height"))
-
-        # URL input
-        content.add_widget(self.heading("Paste Video Link"))
-
-        self.url_input = TextInput(
-            hint_text="Paste your video URL here...",
-            size_hint_y=None,
-            height=dp(52),
+            height=dp(48),
             multiline=False,
             background_color=DARK,
             foreground_color=WHITE,
             cursor_color=PURPLE,
             padding=dp(12)
         )
-        content.add_widget(self.url_input)
+        root.add_widget(self.search)
 
-        # Quality
-        content.add_widget(self.heading("Video Quality"))
+        search_btn = self.make_button("🔍 SEARCH")
+        search_btn.bind(on_press=self.search_song)
+        root.add_widget(search_btn)
 
-        self.quality = Spinner(
-            text="Auto Quality",
-            values=(
-                "Auto Quality",
-                "144p", "240p", "360p", "480p",
-                "720p HD", "1080p Full HD",
-                "2K", "4K", "8K", "16K"
-            ),
-            size_hint_y=None,
-            height=dp(48),
-            background_normal="",
-            background_color=PURPLE,
-            color=WHITE
-        )
-        content.add_widget(self.quality)
+        # Categories
+        root.add_widget(self.heading("Explore Music"))
 
-        # Audio quality
-        content.add_widget(self.heading("Audio Quality"))
-
-        self.audio = Spinner(
-            text="320 kbps",
-            values=(
-                "64 kbps", "128 kbps", "192 kbps",
-                "256 kbps", "320 kbps", "FLAC"
-            ),
-            size_hint_y=None,
-            height=dp(45),
-            background_normal="",
-            background_color=DARK,
-            color=WHITE
-        )
-        content.add_widget(self.audio)
-
-        # Download button
-        download = Button(
-            text="⬇  DOWNLOAD NOW",
-            size_hint_y=None,
-            height=dp(55),
-            background_normal="",
-            background_color=PURPLE,
-            font_size=sp(17),
-            bold=True
-        )
-        download.bind(on_press=self.start_download)
-        content.add_widget(download)
-
-        # Feature cards
-        content.add_widget(self.heading("Explore Features"))
-
-        grid = GridLayout(
+        categories = GridLayout(
             cols=2,
-            spacing=dp(10),
+            spacing=dp(8),
             size_hint_y=None,
-            row_default_height=dp(100),
-            row_force_default=True
+            height=dp(105)
         )
-        grid.bind(minimum_height=grid.setter("height"))
 
-        features = [
-            ("🎬", "Video Downloader"),
-            ("🎵", "MP3 Downloader"),
-            ("🔄", "Video to MP3"),
-            ("▶", "YouTube"),
-            ("📥", "Download Manager"),
-            ("🎧", "Music Player"),
-            ("📂", "Download History"),
-            ("⚙", "Settings")
+        for name in [
+            "🔥 Latest Hindi",
+            "🎵 Old Hindi",
+            "🎬 Music Videos",
+            "🎧 Audio Songs"
+        ]:
+            btn = self.make_button(name, DARK)
+            btn.bind(
+                on_press=lambda b, n=name: self.category(n)
+            )
+            categories.add_widget(btn)
+
+        root.add_widget(categories)
+
+        # Scrollable songs
+        scroll = ScrollView()
+
+        content = BoxLayout(
+            orientation="vertical",
+            spacing=dp(9),
+            size_hint_y=None
+        )
+        content.bind(
+            minimum_height=content.setter("height")
+        )
+
+        content.add_widget(
+            self.heading("Popular Hindi Music")
+        )
+
+        songs = [
+            "Latest Bollywood Music",
+            "Romantic Hindi Songs",
+            "90s Hindi Songs",
+            "Old Bollywood Classics",
+            "Hindi Movie Songs",
+            "New Music Videos",
+            "Instrumental Music",
+            "Devotional Music"
         ]
 
-        for icon, name in features:
-            btn = Button(
-                text=f"{icon}\n{name}",
-                font_size=sp(15),
+        for song in songs:
+            row = BoxLayout(
+                size_hint_y=None,
+                height=dp(65),
+                spacing=dp(8)
+            )
+
+            info = Label(
+                text="🎵  " + song,
+                color=WHITE,
+                font_size=sp(14),
+                halign="left",
+                valign="middle"
+            )
+            info.bind(
+                size=lambda obj, val: setattr(
+                    obj, "text_size", val
+                )
+            )
+
+            play = Button(
+                text="▶",
+                size_hint_x=None,
+                width=dp(55),
                 background_normal="",
-                background_color=DARK,
-                color=WHITE
+                background_color=PURPLE
             )
-            btn.bind(
-                on_press=lambda instance, n=name: self.feature(n)
+
+            play.bind(
+                on_press=lambda b, s=song: self.select_song(s)
             )
-            grid.add_widget(btn)
 
-        content.add_widget(grid)
-
-        # Bottom information
-        content.add_widget(Label(
-            text="Fast • Simple • Powerful",
-            color=PURPLE,
-            size_hint_y=None,
-            height=dp(45)
-        ))
+            row.add_widget(info)
+            row.add_widget(play)
+            content.add_widget(row)
 
         scroll.add_widget(content)
-        self.root_box.add_widget(scroll)
+        root.add_widget(scroll)
+
+        # Player
+        player = BoxLayout(
+            orientation="vertical",
+            size_hint_y=None,
+            height=dp(125),
+            padding=dp(8),
+            spacing=dp(6)
+        )
+
+        player.add_widget(
+            Label(
+                text="[b]NOW PLAYING[/b]",
+                markup=True,
+                color=PURPLE,
+                size_hint_y=None,
+                height=dp(25)
+            )
+        )
+
+        self.song_label = Label(
+            text=self.current_song,
+            color=WHITE
+        )
+        player.add_widget(self.song_label)
+
+        controls = BoxLayout(spacing=dp(8))
+
+        video_btn = self.make_button("🎬 VIDEO")
+        audio_btn = self.make_button("🎧 AUDIO")
+
+        video_btn.bind(
+            on_press=lambda b: self.set_mode("VIDEO")
+        )
+        audio_btn.bind(
+            on_press=lambda b: self.set_mode("AUDIO")
+        )
+
+        controls.add_widget(video_btn)
+        controls.add_widget(audio_btn)
+
+        player.add_widget(controls)
+        root.add_widget(player)
 
         # Bottom navigation
         nav = BoxLayout(
             size_hint_y=None,
-            height=dp(55),
+            height=dp(48),
             spacing=dp(5)
         )
 
-        for name in ["Home", "Downloads", "Convert", "Settings"]:
-            btn = Button(
-                text=name,
-                font_size=sp(12),
-                background_normal="",
-                background_color=DARK
-            )
+        for name in ["Home", "Music", "Downloads", "Settings"]:
+            btn = self.make_button(name, DARK)
             btn.bind(
-                on_press=lambda instance, n=name: self.feature(n)
+                on_press=lambda b, n=name: self.navigation(n)
             )
             nav.add_widget(btn)
 
-        self.root_box.add_widget(nav)
+        root.add_widget(nav)
 
-        return self.root_box
+        return root
 
     def heading(self, text):
         return Label(
             text=f"[b]{text}[/b]",
             markup=True,
             color=WHITE,
-            font_size=sp(17),
+            font_size=sp(18),
             size_hint_y=None,
             height=dp(38),
             halign="left"
         )
 
+    def make_button(self, text, color=PURPLE):
+        return Button(
+            text=text,
+            color=WHITE,
+            font_size=sp(13),
+            background_normal="",
+            background_color=color
+        )
+
     def message(self, title, msg):
+        box = BoxLayout(
+            orientation="vertical",
+            padding=dp(12),
+            spacing=dp(10)
+        )
+
+        box.add_widget(
+            Label(text=msg, color=WHITE)
+        )
+
+        close = self.make_button("OK")
+        box.add_widget(close)
+
         popup = Popup(
             title=title,
-            content=Label(
-                text=msg,
-                color=WHITE
-            ),
-            size_hint=(0.85, 0.35)
+            content=box,
+            size_hint=(0.88, 0.4)
         )
+
+        close.bind(on_press=popup.dismiss)
         popup.open()
 
-    def start_download(self, instance):
-        url = self.url_input.text.strip()
-
-        if not url:
-            self.message(
-                "Video Downloader",
-                "Please paste a video link first."
-            )
-            return
-
-        if not url.startswith(("https://", "http://")):
-            self.message(
-                "Invalid Link",
-                "Please enter a valid URL."
-            )
-            return
+    def select_song(self, song):
+        self.current_song = song
+        self.song_label.text = song
 
         self.message(
-            "Download Setup",
-            "Link received. Actual downloading will be added in the next development step."
+            "Music Player",
+            song + "\n\nगाणे निवडले आहे. अधिकृत Audio/Video स्रोत जोडणे बाकी आहे."
         )
 
-    def feature(self, name):
+    def set_mode(self, mode):
+        self.current_mode = mode
+
+        if mode == "VIDEO":
+            self.message(
+                "Video Mode",
+                "Video Mode निवडला आहे."
+            )
+        else:
+            self.message(
+                "Audio Mode",
+                "Audio Mode निवडला आहे. अधिकृत Audio Stream जोडणे बाकी आहे."
+            )
+
+    def search_song(self, instance):
+        query = self.search.text.strip()
+
+        if not query:
+            self.message(
+                "Search",
+                "गाण्याचे नाव लिहा."
+            )
+            return
+
+        self.message(
+            "Music Search",
+            "तुमचा शोध: " + query +
+            "\n\nअधिकृत Music Search API जोडणे बाकी आहे."
+        )
+
+    def category(self, name):
         self.message(
             name,
-            name + " feature selected."
+            "ही Music Category निवडली आहे."
+        )
+
+    def navigation(self, name):
+        self.message(
+            name,
+            name + " विभाग निवडला आहे."
         )
 
     def open_menu(self, instance):
-        options = [
-            "Home",
-            "Video Downloader",
-            "MP3 Downloader",
-            "Video to MP3",
-            "YouTube",
-            "Download Manager",
-            "Download History",
-            "Settings",
-            "About"
-        ]
-
-        layout = BoxLayout(
-            orientation="vertical",
-            spacing=dp(7),
-            padding=dp(10)
+        self.message(
+            "Music Hub",
+            "Home • Music • Video • Audio • Downloads • Settings"
         )
-
-        for option in options:
-            btn = Button(
-                text=option,
-                background_normal="",
-                background_color=DARK,
-                color=WHITE
-            )
-            btn.bind(
-                on_press=lambda b, n=option: (
-                    self.feature(n),
-                    popup.dismiss()
-                )
-            )
-            layout.add_widget(btn)
-
-        popup = Popup(
-            title="VIDEO DOWNLOADER MENU",
-            content=layout,
-            size_hint=(0.85, 0.8)
-        )
-        popup.open()
 
 
 if __name__ == "__main__":
