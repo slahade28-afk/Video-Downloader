@@ -1,5 +1,5 @@
 
-name: Video Downloader APK
+name: Music Hub APK
 
 on:
   workflow_dispatch:
@@ -18,22 +18,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Build APK
-        uses: digreatbrian/buildozer-action@v2
-        with:
-          python-version: "3.11"
-          buildozer-cmd: buildozer -v android debug
-          workdir: .
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Video-Downloader-APK
-          path: bin/*.apk
+          name: Music-Hub-APK
+          path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error

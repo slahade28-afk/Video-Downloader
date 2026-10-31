@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Hub</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#10101b;color:white;font-family:Arial,sans-serif}
+header{padding:22px;background:#19192b}
+h1{margin:0;color:#b69cff}
+header p{color:#aaa;margin-bottom:0}
+nav{display:flex;gap:10px;padding:14px;overflow:auto}
+button{border:0;border-radius:12px;padding:12px 16px;background:#292943;color:white}
+button.active,.primary{background:#8055ed;color:white}
+main{padding:15px}
+.panel{background:#1c1c30;border-radius:18px;padding:18px;margin-bottom:16px}
+h2{font-size:19px}
+input{width:100%;padding:13px;margin:7px 0 12px;border:1px solid #444;border-radius:10px;background:#11111e;color:white}
+.song{padding:13px;border-bottom:1px solid #38384c}
+.song button{float:right}
+#player{position:sticky;bottom:0;background:#29213e;padding:16px}
+small{color:#aaa}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+<h1>🎵 Music Hub</h1>
+<p>तुमची गाणी, तुमचा संगीताचा संसार</p>
+</header>
+
+<nav>
+<button class="active" onclick="showPage('home',this)">Home</button>
+<button onclick="showPage('videos',this)">Videos</button>
+<button onclick="showPage('admin',this)">Admin</button>
+</nav>
+
+<main>
+<section id="home">
+<div class="panel">
+<h2>🎧 Music Library</h2>
+<p>आपल्या Music Hub मध्ये स्वागत आहे!</p>
+<div id="songs"><small>अजून गाणी अपलोड केलेली नाहीत.</small></div>
+</div>
+<div class="panel">
+<h2>▶️ Music Player</h2>
+<audio id="audio" controls style="width:100%"></audio>
+<p id="playing">गाणे निवडा</p>
+</div>
+</section>
+
+<section id="videos" class="hidden">
+<div class="panel">
+<h2>🎬 Video Library</h2>
+<div id="videoList"><small>अजून व्हिडिओ अपलोड केलेले नाहीत.</small></div>
+</div>
+</section>
+
+<section id="admin" class="hidden">
+<div class="panel" id="login">
+<h2>🔐 Admin Login</h2>
+<input id="password" type="password" placeholder="Admin Password">
+<button class="primary" onclick="login()">Login</button>
+<button onclick="setup()">पहिल्यांदा पासवर्ड सेट करा</button>
+<p id="loginMsg"></p>
+</div>
+
+<div class="panel hidden" id="dashboard">
+<h2>📤 Upload Songs</h2>
+<input id="songName" placeholder="गाण्याचे नाव">
+<input id="songFile" type="file" accept="audio/*">
+<button class="primary" onclick="uploadSong()">गाणे जोडा</button>
+
+<h2>📹 Upload Videos</h2>
+<input id="videoName" placeholder="व्हिडिओचे नाव">
+<input id="videoFile" type="file" accept="video/*">
+<button class="primary" onclick="uploadVideo()">व्हिडिओ जोडा</button>
+<p><small>ही सध्या फोनवरील तात्पुरती Demo Library आहे.</small></p>
+<button onclick="logout()">Logout</button>
+</div>
+</section>
+</main>
+
+<script>
+function showPage(id,btn){
+ document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+ document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+ btn.classList.add('active');
+}
+function setup(){
+ let p=document.getElementById('password').value;
+ if(p.length<8){alert('किमान 8 अक्षरांचा पासवर्ड ठेवा');return}
+ if(localStorage.getItem('mh_admin')){alert('पासवर्ड आधीच सेट आहे');return}
+ localStorage.setItem('mh_admin',p);
+ alert('पासवर्ड सेट झाला');
+}
+function login(){
+ if(document.getElementById('password').value===localStorage.getItem('mh_admin') && localStorage.getItem('mh_admin')){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+ }else document.getElementById('loginMsg').innerText='पासवर्ड चुकीचा आहे';
+}
+function logout(){
+ document.getElementById('dashboard').classList.add('hidden');
+ document.getElementById('login').classList.remove('hidden');
+}
+function uploadSong(){
+ let f=document.getElementById('songFile').files[0];
+ let n=document.getElementById('songName').value|| (f&&f.name);
+ if(!f||!n){alert('गाणे आणि नाव निवडा');return}
+ let url=URL.createObjectURL(f);
+ let b=document.createElement('div');
+ b.className='song';
+ let t=document.createElement('span');t.textContent=n;
+ let play=document.createElement('button');play.textContent='Play';
+ play.onclick=()=>{document.getElementById('audio').src=url;document.getElementById('audio').play();document.getElementById('playing').textContent=n};
+ b.append(t,play);document.getElementById('songs').append(b);
+ document.getElementById('songName').value='';
+ document.getElementById('songFile').value='';
+}
+function uploadVideo(){
+ let f=document.getElementById('videoFile').files[0];
+ let n=document.getElementById('videoName').value||(f&&f.name);
+ if(!f||!n){alert('व्हिडिओ आणि नाव निवडा');return}
+ let url=URL.createObjectURL(f);
+ let v=document.createElement('video');
+ v.controls=true;v.src=url;v.style.width='100%';
+ let box=document.createElement('div');box.className='song';
+ let title=document.createElement('p');title.textContent=n;
+ box.append(title,v);document.getElementById('videoList').append(box);
+ document.getElementById('videoName').value='';
+ document.getElementById('videoFile').value='';
+}
+</script>
+</body>
+</html>
