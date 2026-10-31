@@ -1,4 +1,3 @@
-
 name: Music Hub APK
 
 on:
@@ -30,17 +29,17 @@ jobs:
           java-version: "21"
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          echo "SDKMANAGER=$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Sync Capacitor
         run: npx cap sync android
-
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
       - name: Build APK
         run: |
