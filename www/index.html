@@ -1,137 +1,274 @@
+
 <!DOCTYPE html>
-<html lang="mr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Music Hub</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#10101b;color:white;font-family:Arial,sans-serif}
-header{padding:22px;background:#19192b}
+header{padding:20px;background:#19192b}
 h1{margin:0;color:#b69cff}
-header p{color:#aaa;margin-bottom:0}
-nav{display:flex;gap:10px;padding:14px;overflow:auto}
-button{border:0;border-radius:12px;padding:12px 16px;background:#292943;color:white}
+header p,small{color:#aaa}
+nav{display:flex;gap:8px;padding:12px;overflow:auto}
+button{border:0;border-radius:12px;padding:12px 15px;background:#292943;color:white;cursor:pointer}
 button.active,.primary{background:#8055ed;color:white}
-main{padding:15px}
-.panel{background:#1c1c30;border-radius:18px;padding:18px;margin-bottom:16px}
-h2{font-size:19px}
-input{width:100%;padding:13px;margin:7px 0 12px;border:1px solid #444;border-radius:10px;background:#11111e;color:white}
-.song{padding:13px;border-bottom:1px solid #38384c}
-.song button{float:right}
-#player{position:sticky;bottom:0;background:#29213e;padding:16px}
-small{color:#aaa}
+main{padding:14px}
+.panel{background:#1c1c30;border-radius:16px;padding:16px;margin-bottom:15px}
+input,select{width:100%;padding:13px;margin:8px 0 12px;border:1px solid #444;border-radius:10px;background:#11111e;color:white}
+.row{display:flex;gap:8px}
+.row button{flex:1}
+.result{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #38384c}
+.result img{width:115px;height:75px;object-fit:cover;border-radius:9px}
+.result h3{font-size:14px;margin:0 0 7px}
+.result p{font-size:12px;color:#aaa;margin:0 0 8px}
 .hidden{display:none}
+#player iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px}
+.song{padding:12px;border-bottom:1px solid #38384c}
+footer{text-align:center;color:#888;padding:20px}
 </style>
 </head>
 <body>
+
 <header>
 <h1>🎵 Music Hub</h1>
-<p>तुमची गाणी, तुमचा संगीताचा संसार</p>
+<p>Discover Music and Videos Worldwide</p>
 </header>
 
 <nav>
 <button class="active" onclick="showPage('home',this)">Home</button>
+<button onclick="showPage('music',this)">Music</button>
 <button onclick="showPage('videos',this)">Videos</button>
 <button onclick="showPage('admin',this)">Admin</button>
 </nav>
 
 <main>
+
 <section id="home">
 <div class="panel">
-<h2>🎧 Music Library</h2>
-<p>आपल्या Music Hub मध्ये स्वागत आहे!</p>
-<div id="songs"><small>अजून गाणी अपलोड केलेली नाहीत.</small></div>
+<h2>Discover Music & Videos</h2>
+<p>Search songs and videos from different languages.</p>
+<input id="homeQuery" placeholder="Search music or videos...">
+<div class="row">
+<button class="primary" onclick="searchOnline('music','homeQuery')">Search Music</button>
+<button class="primary" onclick="searchOnline('video','homeQuery')">Search Videos</button>
+</div>
 </div>
 <div class="panel">
-<h2>▶️ Music Player</h2>
-<audio id="audio" controls style="width:100%"></audio>
-<p id="playing">गाणे निवडा</p>
+<h2>Explore Categories</h2>
+<div class="row">
+<button onclick="quickSearch('Marathi songs','music')">Marathi</button>
+<button onclick="quickSearch('Hindi songs','music')">Hindi</button>
+</div>
+<div class="row">
+<button onclick="quickSearch('English music','music')">English</button>
+<button onclick="quickSearch('Popular music','music')">Trending</button>
+</div>
+</div>
+</section>
+
+<section id="music" class="hidden">
+<div class="panel">
+<h2>🎵 Online Music Search</h2>
+<input id="musicQuery" placeholder="Search songs, artists, albums...">
+<button class="primary" onclick="searchOnline('music','musicQuery')">Search Music</button>
+<div id="musicResults"></div>
 </div>
 </section>
 
 <section id="videos" class="hidden">
 <div class="panel">
-<h2>🎬 Video Library</h2>
-<div id="videoList"><small>अजून व्हिडिओ अपलोड केलेले नाहीत.</small></div>
+<h2>🎬 Online Video Search</h2>
+<input id="videoQuery" placeholder="Search videos...">
+<button class="primary" onclick="searchOnline('video','videoQuery')">Search Videos</button>
+<div id="videoResults"></div>
 </div>
 </section>
 
 <section id="admin" class="hidden">
 <div class="panel" id="login">
-<h2>🔐 Admin Login</h2>
+<h2>Admin Login</h2>
 <input id="password" type="password" placeholder="Admin Password">
 <button class="primary" onclick="login()">Login</button>
-<button onclick="setup()">पहिल्यांदा पासवर्ड सेट करा</button>
+<button onclick="setup()">Set First Password</button>
 <p id="loginMsg"></p>
 </div>
-
 <div class="panel hidden" id="dashboard">
-<h2>📤 Upload Songs</h2>
-<input id="songName" placeholder="गाण्याचे नाव">
+<h2>Upload Songs</h2>
+<input id="songName" placeholder="Song Name">
 <input id="songFile" type="file" accept="audio/*">
-<button class="primary" onclick="uploadSong()">गाणे जोडा</button>
-
-<h2>📹 Upload Videos</h2>
-<input id="videoName" placeholder="व्हिडिओचे नाव">
+<button class="primary" onclick="uploadSong()">Add Song</button>
+<div id="songs"></div>
+<hr>
+<h2>Upload Videos</h2>
+<input id="videoName" placeholder="Video Name">
 <input id="videoFile" type="file" accept="video/*">
-<button class="primary" onclick="uploadVideo()">व्हिडिओ जोडा</button>
-<p><small>ही सध्या फोनवरील तात्पुरती Demo Library आहे.</small></p>
+<button class="primary" onclick="uploadVideo()">Add Video</button>
+<div id="videoList"></div>
 <button onclick="logout()">Logout</button>
 </div>
 </section>
+
+<section class="panel">
+<h2>▶️ Player</h2>
+<div id="player"><p id="playing">Select a video to play</p></div>
+</section>
+
 </main>
+<footer>Music Hub • Discover Music Worldwide</footer>
 
 <script>
+const API_KEY = AIzaSyCdE3dVz_8C6T14Z_ck_PRp82Yj2ZmXwm0
+
 function showPage(id,btn){
  document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));
  document.getElementById(id).classList.remove('hidden');
  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
  btn.classList.add('active');
 }
+
+async function searchOnline(type,inputId){
+ const query=document.getElementById(inputId).value.trim();
+ if(!query){alert("Enter a search term");return;}
+ if(API_KEY==="PASTE_YOUR_API_KEY_HERE"){
+  alert("Please add your YouTube API Key in the code.");
+  return;
+ }
+ const target=type==="music"?"musicResults":
+              type==="video"?"videoResults":null;
+ let box=target?document.getElementById(target):null;
+ if(box) box.innerHTML="<p>Searching...</p>";
+
+ const params=new URLSearchParams({
+  part:"snippet",
+  q:type==="music"?query+" music":query,
+  type:"video",
+  maxResults:"12",
+  regionCode:"IN",
+  safeSearch:"moderate"
+ });
+ try{
+  const response=await fetch(
+   "https://www.googleapis.com/youtube/v3/search?"+
+   params.toString()+"&key="+encodeURIComponent(API_KEY)
+  );
+  const data=await response.json();
+  if(!response.ok) throw new Error(data.error?.message||"Search failed");
+  if(!data.items||data.items.length===0){
+   if(box) box.innerHTML="<p>No results found.</p>";
+   else alert("No results found.");
+   return;
+  }
+  const html=data.items.map(item=>{
+   const id=item.id.videoId;
+   const title=item.snippet.title;
+   const channel=item.snippet.channelTitle;
+   const thumb=item.snippet.thumbnails.medium.url;
+   return `<div class="result">
+    <img src="${thumb}" alt="">
+    <div>
+     <h3>${escapeHTML(title)}</h3>
+     <p>${escapeHTML(channel)}</p>
+     <button onclick="playVideo('${id}','${escapeHTML(title).replace(/'/g,"&#39;")}')">Play</button>
+    </div>
+   </div>`;
+  }).join("");
+  if(box) box.innerHTML=html;
+  else{
+   showPage(type==="music"?"music":"videos",
+    document.querySelectorAll("nav button")[type==="music"?1:2]);
+   document.getElementById(target).innerHTML=html;
+  }
+ }catch(error){
+  if(box) box.innerHTML="<p>Search error: "+escapeHTML(error.message)+"</p>";
+  else alert("Search error: "+error.message);
+ }
+}
+
+function escapeHTML(value){
+ return String(value).replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",
+ '"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+function playVideo(id,title){
+ document.getElementById("player").innerHTML=
+ `<iframe src="https://www.youtube-nocookie.com/embed/${id}"
+ title="YouTube video player" allowfullscreen
+ allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+ <p>${title}</p>`;
+ document.getElementById("playing").textContent=title;
+ document.querySelector(".panel:last-of-type").scrollIntoView({behavior:"smooth"});
+}
+
+function quickSearch(query,type){
+ const page=type==="music"?"music":"videos";
+ showPage(page,document.querySelectorAll("nav button")[type==="music"?1:2]);
+ document.getElementById(type==="music"?"musicQuery":"videoQuery").value=query;
+ searchOnline(type,type==="music"?"musicQuery":"videoQuery");
+}
+
 function setup(){
- let p=document.getElementById('password').value;
- if(p.length<8){alert('किमान 8 अक्षरांचा पासवर्ड ठेवा');return}
- if(localStorage.getItem('mh_admin')){alert('पासवर्ड आधीच सेट आहे');return}
- localStorage.setItem('mh_admin',p);
- alert('पासवर्ड सेट झाला');
+ const p=document.getElementById("password").value;
+ if(p.length<8){alert("Password must be at least 8 characters");return;}
+ if(localStorage.getItem("mh_admin")){alert("Password already exists");return;}
+ localStorage.setItem("mh_admin",p);
+ alert("Password created");
 }
+
 function login(){
- if(document.getElementById('password').value===localStorage.getItem('mh_admin') && localStorage.getItem('mh_admin')){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('dashboard').classList.remove('hidden');
- }else document.getElementById('loginMsg').innerText='पासवर्ड चुकीचा आहे';
+ if(localStorage.getItem("mh_admin") &&
+ document.getElementById("password").value===localStorage.getItem("mh_admin")){
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+ }else{
+  document.getElementById("loginMsg").textContent="Incorrect password";
+ }
 }
+
 function logout(){
- document.getElementById('dashboard').classList.add('hidden');
- document.getElementById('login').classList.remove('hidden');
+ document.getElementById("dashboard").classList.add("hidden");
+ document.getElementById("login").classList.remove("hidden");
 }
+
 function uploadSong(){
- let f=document.getElementById('songFile').files[0];
- let n=document.getElementById('songName').value|| (f&&f.name);
- if(!f||!n){alert('गाणे आणि नाव निवडा');return}
- let url=URL.createObjectURL(f);
- let b=document.createElement('div');
- b.className='song';
- let t=document.createElement('span');t.textContent=n;
- let play=document.createElement('button');play.textContent='Play';
- play.onclick=()=>{document.getElementById('audio').src=url;document.getElementById('audio').play();document.getElementById('playing').textContent=n};
- b.append(t,play);document.getElementById('songs').append(b);
- document.getElementById('songName').value='';
- document.getElementById('songFile').value='';
+ const f=document.getElementById("songFile").files[0];
+ const n=document.getElementById("songName").value||(f&&f.name);
+ if(!f||!n){alert("Select a song and enter its name");return;}
+ const url=URL.createObjectURL(f);
+ const audio=document.createElement("audio");
+ audio.controls=true;
+ audio.src=url;
+ audio.style.width="100%";
+ const box=document.createElement("div");
+ box.className="song";
+ const title=document.createElement("p");
+ title.textContent=n;
+ box.append(title,audio);
+ document.getElementById("songs").append(box);
+ document.getElementById("songName").value="";
+ document.getElementById("songFile").value="";
 }
+
 function uploadVideo(){
- let f=document.getElementById('videoFile').files[0];
- let n=document.getElementById('videoName').value||(f&&f.name);
- if(!f||!n){alert('व्हिडिओ आणि नाव निवडा');return}
- let url=URL.createObjectURL(f);
- let v=document.createElement('video');
- v.controls=true;v.src=url;v.style.width='100%';
- let box=document.createElement('div');box.className='song';
- let title=document.createElement('p');title.textContent=n;
- box.append(title,v);document.getElementById('videoList').append(box);
- document.getElementById('videoName').value='';
- document.getElementById('videoFile').value='';
+ const f=document.getElementById("videoFile").files[0];
+ const n=document.getElementById("videoName").value||(f&&f.name);
+ if(!f||!n){alert("Select a video and enter its name");return;}
+ const url=URL.createObjectURL(f);
+ const video=document.createElement("video");
+ video.controls=true;
+ video.src=url;
+ video.style.width="100%";
+ const box=document.createElement("div");
+ box.className="song";
+ const title=document.createElement("p");
+ title.textContent=n;
+ box.append(title,video);
+ document.getElementById("videoList").append(box);
+ document.getElementById("videoName").value="";
+ document.getElementById("videoFile").value="";
 }
 </script>
 </body>
