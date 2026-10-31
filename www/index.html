@@ -105,7 +105,8 @@ async function loadTrending(){
   if(!response.ok)throw new Error(data.error?.message||'YouTube API error');
   displayVideos(data.items||[]);
  }catch(error){
-  showStatus('Could not load videos. Check API key and internet connection.');
+  console.error("YouTube API Error:", error);
+  showStatus("Error: " + error.message);
  }
 }
 
@@ -125,7 +126,8 @@ async function searchVideos(){
   }));
   displayVideos(items);
  }catch(error){
-  showStatus('Search failed. Check API key and internet connection.');
+  console.error("YouTube Search Error:", error);
+  showStatus("Search Error: " + error.message);
  }
 }
 
