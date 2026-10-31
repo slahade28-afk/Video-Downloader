@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "93937243185",
+    "project_id": "music-hb-b00b1",
+    "storage_bucket": "music-hb-b00b1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93937243185:android:2565b15fbe17e7f282f110",
+        "android_client_info": {
+          "package_name": "com.slahade28.musichub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPeE0Jp-Ci6jCHVd0q_azXohfchKOAhJo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
