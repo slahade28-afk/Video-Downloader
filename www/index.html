@@ -7,30 +7,31 @@
 <title>Music Hub</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#0f0f0f;color:white;font-family:Arial,sans-serif}
-header{height:58px;display:flex;align-items:center;gap:15px;padding:0 14px;background:#0f0f0f;position:sticky;top:0;z-index:5}
-button{border:0;background:transparent;color:white;font-size:20px;cursor:pointer}
-#search{flex:1;min-width:0;display:flex;gap:5px}
-#search input{width:100%;min-width:0;background:#222;color:white;border:1px solid #444;border-radius:25px;padding:11px 16px;font-size:15px}
-#search button{background:#292929;border-radius:50%;width:42px}
-#videos{padding:8px;display:grid;grid-template-columns:1fr;gap:18px}
+body{margin:0;background:#101010;color:white;font-family:Arial}
+header{height:60px;background:#181818;display:flex;align-items:center;gap:12px;padding:10px;position:sticky;top:0;z-index:5}
+button{background:#292929;color:white;border:0;padding:12px;border-radius:9px;font-size:15px;cursor:pointer}
+input{background:#222;color:white;border:1px solid #555;padding:12px;border-radius:20px;min-width:0}
+#search{display:flex;flex:1;gap:5px}
+#search input{flex:1;width:100%}
+h2{padding:10px}
+#videos{display:grid;grid-template-columns:1fr;gap:15px;padding:10px}
 .video{cursor:pointer}
-.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;background:#222}
-.details{display:flex;gap:12px;padding:9px 3px}
-.channel{width:38px;height:38px;border-radius:50%;background:#333;flex-shrink:0}
-.info{flex:1;min-width:0}
-.info strong{font-size:15px;line-height:1.4;display:block}
-.info small{display:block;color:#aaa;margin-top:5px;font-size:12px}
-.more{font-size:21px;padding:0 8px}
-#drawer{position:fixed;inset:0;background:#0009;z-index:10;display:none}
-#menu{width:270px;height:100%;background:#181818;padding:20px}
-.menuitem{display:block;width:100%;text-align:left;padding:16px;border-radius:9px;font-size:16px}
-.menuitem:active{background:#333}
-#player{display:none;position:fixed;inset:0;background:#0f0f0f;z-index:8;overflow:auto}
-#player iframe{width:100%;aspect-ratio:16/9;border:0}
-#player h3{padding:10px 15px}
-#player button{padding:12px}
-#status{text-align:center;color:#aaa;padding:25px}
+.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px}
+.details{padding:8px}
+.details small{color:#aaa}
+#drawer{display:none;position:fixed;inset:0;background:#000b;z-index:20}
+#menu{width:270px;background:#181818;height:100%;padding:15px}
+.menuitem{display:block;width:100%;margin:8px 0;text-align:left}
+#player{display:none;position:fixed;inset:0;background:#101010;z-index:10;overflow:auto;padding:12px}
+#videoArea{overflow:hidden;width:100%;background:black}
+#frame{width:100%;aspect-ratio:16/9;border:0;transform-origin:center}
+#frame iframe{width:100%;height:100%;border:0}
+#controls{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}
+#admin,#music{display:none;padding:18px}
+.panel{background:#202020;padding:15px;border-radius:12px;margin:12px 0}
+.panel button{margin:4px}
+#status{text-align:center;color:#aaa;padding:20px}
+#music audio{width:100%;margin-top:15px}
 @media(min-width:700px){
 #videos{grid-template-columns:repeat(2,1fr)}
 }
@@ -40,8 +41,10 @@ button{border:0;background:transparent;color:white;font-size:20px;cursor:pointer
 
 <header>
 <button onclick="openMenu()">☰</button>
+<strong>🎵 Music Hub</strong>
 <div id="search">
-<input id="query" placeholder="Search" onkeydown="if(event.key==='Enter')searchVideos()">
+<input id="query" placeholder="Search music..."
+onkeydown="if(event.key==='Enter')searchVideos()">
 <button onclick="searchVideos()">⌕</button>
 </div>
 </header>
@@ -51,26 +54,70 @@ button{border:0;background:transparent;color:white;font-size:20px;cursor:pointer
 
 <div id="drawer" onclick="closeMenu()">
 <div id="menu" onclick="event.stopPropagation()">
-<button onclick="closeMenu()" style="margin-bottom:20px">✕</button>
+<button onclick="closeMenu()">✕ Close</button>
 <button class="menuitem" onclick="home()">⌂ Home</button>
-<button class="menuitem" onclick="showMessage('Music Library')">♫ Music</button>
-<button class="menuitem" onclick="home()">▣ Videos</button>
-<button class="menuitem" onclick="showMessage('Select audio files from your phone to play them.')">↓ Downloads</button>
-<button class="menuitem" onclick="showMessage('Voice search will be available in a supported browser.')">🎙 Voice Search</button>
+<button class="menuitem" onclick="home()">🔥 Trending</button>
+<button class="menuitem" onclick="showMusic()">🎵 MP3 Player</button>
+<button class="menuitem" onclick="showAdmin()">🔐 Admin Panel</button>
 </div>
 </div>
 
 <div id="player">
 <button onclick="closePlayer()">← Back</button>
-<div id="frame"></div>
 <h3 id="videoTitle"></h3>
+<div id="videoArea">
+<div id="frame"></div>
+</div>
+<div id="controls">
+<button onclick="zoom(0.2)">＋ Zoom</button>
+<button onclick="zoom(-0.2)">－ Zoom</button>
+<button onclick="resetZoom()">Reset</button>
+<button onclick="rotate()">Rotate</button>
+<button onclick="fullscreen()">Full Screen</button>
+</div>
+<p>Zoom and rotate controls work on supported video content.</p>
+</div>
+
+<div id="music">
+<button onclick="hidePanels()">← Back</button>
+<h2>🎵 MP3 Player</h2>
+<div class="panel">
+<p>Select an audio file from your phone</p>
+<input type="file" id="audioFile" accept="audio/*">
+<audio id="audioPlayer" controls></audio>
+</div>
+</div>
+
+<div id="admin">
+<button onclick="hidePanels()">← Back</button>
+<h2>🔐 Admin Panel</h2>
+<div class="panel">
+<h3>Admin Login</h3>
+<input id="adminPass" type="password" placeholder="Enter admin password">
+<button onclick="adminLogin()">Login</button>
+</div>
+<div id="adminTools" style="display:none">
+<div class="panel">
+<h3>Dashboard</h3>
+<p>Welcome to Music Hub Admin.</p>
+<p>App: Music Hub</p>
+<p>Status: Active</p>
+</div>
+<div class="panel">
+<h3>Settings</h3>
+<button onclick="showMessage('Music Hub settings')">App Settings</button>
+<button onclick="showMessage('YouTube API configuration is managed separately.')">API Settings</button>
+<button onclick="adminLogout()">Logout</button>
+</div>
+</div>
 </div>
 
 <script>
-const API_KEY =  'AIzaSyBEF30dvGNnpyVWgbFCpuqaVO0h_4r6VxU';
+const API_KEY = 'AIzaSyC-O3G5GVp53eStJWxpLoODPjnguMX-x2o';
 
-const videos = document.getElementById('videos');
-const statusBox = document.getElementById('status');
+const videos=document.getElementById('videos');
+const statusBox=document.getElementById('status');
+let scale=1,rotation=0;
 
 function openMenu(){
  document.getElementById('drawer').style.display='block';
@@ -78,112 +125,151 @@ function openMenu(){
 function closeMenu(){
  document.getElementById('drawer').style.display='none';
 }
-function showMessage(message){
- closeMenu();
- alert(message);
+function showMessage(m){alert(m)}
+function hidePanels(){
+ document.getElementById('music').style.display='none';
+ document.getElementById('admin').style.display='none';
+ videos.style.display='grid';
+ statusBox.style.display='block';
 }
 function home(){
  closeMenu();
+ hidePanels();
  loadTrending();
 }
-function showStatus(message){
- statusBox.textContent=message;
+function showMusic(){
+ closeMenu();
+ videos.style.display='none';
+ statusBox.style.display='none';
+ document.getElementById('admin').style.display='none';
+ document.getElementById('music').style.display='block';
+}
+function showAdmin(){
+ closeMenu();
+ videos.style.display='none';
+ statusBox.style.display='none';
+ document.getElementById('music').style.display='none';
+ document.getElementById('admin').style.display='block';
+}
+function adminLogin(){
+ const pass=document.getElementById('adminPass').value;
+ let saved=localStorage.getItem('musicHubAdminPassword');
+ if(!saved){
+  if(pass.length<8){
+   alert('Choose a password with at least 8 characters.');
+   return;
+  }
+  localStorage.setItem('musicHubAdminPassword',pass);
+  alert('Admin password created. Login again.');
+  return;
+ }
+ if(pass===saved){
+  document.getElementById('adminTools').style.display='block';
+  alert('Login successful');
+ }else{
+  alert('Wrong password');
+ }
+}
+function adminLogout(){
+ document.getElementById('adminTools').style.display='none';
+ document.getElementById('adminPass').value='';
+}
+function zoom(v){
+ scale=Math.max(0.5,Math.min(3,scale+v));
+ updateTransform();
+}
+function rotate(){
+ rotation=(rotation+90)%360;
+ updateTransform();
+}
+function resetZoom(){
+ scale=1;rotation=0;updateTransform();
+}
+function updateTransform(){
+ const frame=document.getElementById('frame');
+ frame.style.transform='scale('+scale+') rotate('+rotation+'deg)';
+}
+function fullscreen(){
+ const area=document.getElementById('videoArea');
+ if(area.requestFullscreen)area.requestFullscreen();
+}
+function showStatus(m){
+ statusBox.textContent=m;
  statusBox.style.display='block';
 }
-
 async function loadTrending(){
  videos.innerHTML='';
- showStatus('Loading videos...');
- if(API_KEY.includes('PASTE_YOUR')){
-  showStatus('Add your YouTube API key to load videos.');
+ showStatus('Loading Trending...');
+ if(API_KEY.includes('PASTE_')){
+  showStatus('YouTube API setup required.');
   return;
  }
  try{
   const url='https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=IN&videoCategoryId=10&maxResults=30&key='+API_KEY;
-  const response=await fetch(url);
-  const data=await response.json();
-  if(!response.ok)throw new Error(data.error?.message||'YouTube API error');
-  displayVideos(data.items||[]);
- }catch(error){
-  console.error("YouTube API Error:", error);
-  showStatus("Error: " + error.message);
- }
+  const r=await fetch(url);
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?.message||'API error');
+  displayVideos(d.items||[]);
+ }catch(e){showStatus('Error: '+e.message)}
 }
-
 async function searchVideos(){
  const q=document.getElementById('query').value.trim();
  if(!q)return;
  videos.innerHTML='';
  showStatus('Searching...');
  try{
-  const url='https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&regionCode=IN&order=relevance&maxResults=25&q='+encodeURIComponent(q)+'&key='+API_KEY;
-  const response=await fetch(url);
-  const data=await response.json();
-  if(!response.ok)throw new Error(data.error?.message||'Search error');
-  const items=(data.items||[]).filter(v=>v.id.videoId).map(v=>({
-   id:v.id.videoId,
-   snippet:v.snippet
-  }));
+  const url='https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&regionCode=IN&maxResults=25&q='+encodeURIComponent(q)+'&key='+API_KEY;
+  const r=await fetch(url);
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?.message||'Search error');
+  const items=(d.items||[]).filter(v=>v.id.videoId).map(v=>({id:v.id.videoId,snippet:v.snippet}));
   displayVideos(items);
- }catch(error){
-  console.error("YouTube Search Error:", error);
-  showStatus("Search Error: " + error.message);
- }
+ }catch(e){showStatus('Search error: '+e.message)}
 }
-
 function displayVideos(items){
  videos.innerHTML='';
- if(!items.length){
-  showStatus('No videos found.');
-  return;
- }
+ if(!items.length){showStatus('No videos found');return}
  statusBox.style.display='none';
  items.forEach(item=>{
   const id=typeof item.id==='string'?item.id:item.id.videoId;
   const s=item.snippet;
-  const thumb=s.thumbnails?.high?.url||s.thumbnails?.medium?.url||s.thumbnails?.default?.url;
   const card=document.createElement('div');
   card.className='video';
   const img=document.createElement('img');
   img.className='thumb';
-  img.src=thumb||'';
-  img.alt='';
+  img.src=s.thumbnails?.high?.url||s.thumbnails?.medium?.url||'';
   const details=document.createElement('div');
   details.className='details';
-  const avatar=document.createElement('div');
-  avatar.className='channel';
-  const info=document.createElement('div');
-  info.className='info';
   const title=document.createElement('strong');
   title.textContent=s.title;
   const channel=document.createElement('small');
   channel.textContent=s.channelTitle||'';
-  info.append(title,channel);
-  const more=document.createElement('button');
-  more.className='more';
-  more.textContent='⋮';
-  more.onclick=e=>{
-   e.stopPropagation();
-   alert('Download is available only for videos whose owner provides an authorized download option.');
-  };
-  details.append(avatar,info,more);
+  details.append(title,document.createElement('br'),channel);
   card.append(img,details);
   card.onclick=()=>playVideo(id,s.title);
   videos.append(card);
  });
 }
-
 function playVideo(id,title){
  document.getElementById('player').style.display='block';
  document.getElementById('videoTitle').textContent=title;
  document.getElementById('frame').innerHTML=
  '<iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+ resetZoom();
 }
 function closePlayer(){
  document.getElementById('player').style.display='none';
  document.getElementById('frame').innerHTML='';
 }
+document.getElementById('audioFile').addEventListener('change',function(){
+ const file=this.files[0];
+ if(file){
+  document.getElementById('audioPlayer').src=URL.createObjectURL(file);
+  document.getElementById('audioPlayer').play();
+ }
+});
 loadTrending();
 </script>
 </body>
 </html>
+
