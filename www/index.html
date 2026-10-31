@@ -3,251 +3,185 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Music Hub</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#050815;color:#f5f5ff;font-family:Arial,sans-serif}
-header{padding:20px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.logo{font-size:25px;font-weight:bold;color:#c65cff}
-button{border:0;border-radius:12px;padding:13px 17px;background:#24213e;color:white;font-size:15px;cursor:pointer}
-button:active{transform:scale(.97)}
-.primary{background:linear-gradient(120deg,#a82de7,#5139f5)}
-nav{display:flex;gap:8px;padding:0 15px;overflow-x:auto}
-nav button{min-width:110px}
-nav button.active{background:#43175b;border:1px solid #d44cff}
-main{padding:18px;max-width:1100px;margin:auto}
-.hero{padding:30px;border-radius:20px;background:linear-gradient(120deg,#17102c,#211044,#090e22);border:1px solid #43205c;margin:18px 0}
-.hero h1{font-size:38px;margin:10px 0;color:#c75cff}
-.hero p{font-size:18px}
-.section{margin:25px 0}
-.section h2{font-size:21px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
-.card{background:#101729;border:1px solid #222c42;border-radius:15px;padding:20px 10px;text-align:center;cursor:pointer}
-.card .emoji{font-size:32px;margin-bottom:10px}
-.card p{color:#aeb8d0;font-size:13px;margin-bottom:0}
-.panel{background:#101729;border:1px solid #273047;border-radius:15px;padding:18px;margin:15px 0}
-input{width:100%;padding:15px;border-radius:12px;border:1px solid #39415c;background:#080e1d;color:white;font-size:16px;margin:10px 0}
-.track{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #293047}
-.track .cover{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#a72ee8,#244edb);display:grid;place-items:center;font-size:23px}
-.track .info{flex:1;min-width:0}
-.track small{color:#aab3c8}
-.player{position:sticky;bottom:0;background:#11182a;border:1px solid #343d57;padding:14px;border-radius:16px;margin-top:25px}
-.player-controls{display:flex;align-items:center;justify-content:center;gap:15px;margin:10px}
-.player button{font-size:18px}
-#progress{width:100%;accent-color:#bd48ef}
-.page{display:none}
-.page.show{display:block}
-.note{font-size:13px;color:#aab3c8;line-height:1.5}
-.result{display:block;color:#d9a1ff;text-decoration:none;padding:12px;border-bottom:1px solid #293047}
-footer{text-align:center;color:#78839d;padding:25px}
+body{margin:0;background:#0f0f0f;color:white;font-family:Arial,sans-serif}
+header{height:58px;display:flex;align-items:center;gap:15px;padding:0 14px;background:#0f0f0f;position:sticky;top:0;z-index:5}
+button{border:0;background:transparent;color:white;font-size:20px;cursor:pointer}
+#search{flex:1;min-width:0;display:flex;gap:5px}
+#search input{width:100%;min-width:0;background:#222;color:white;border:1px solid #444;border-radius:25px;padding:11px 16px;font-size:15px}
+#search button{background:#292929;border-radius:50%;width:42px}
+#videos{padding:8px;display:grid;grid-template-columns:1fr;gap:18px}
+.video{cursor:pointer}
+.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:9px;background:#222}
+.details{display:flex;gap:12px;padding:9px 3px}
+.channel{width:38px;height:38px;border-radius:50%;background:#333;flex-shrink:0}
+.info{flex:1;min-width:0}
+.info strong{font-size:15px;line-height:1.4;display:block}
+.info small{display:block;color:#aaa;margin-top:5px;font-size:12px}
+.more{font-size:21px;padding:0 8px}
+#drawer{position:fixed;inset:0;background:#0009;z-index:10;display:none}
+#menu{width:270px;height:100%;background:#181818;padding:20px}
+.menuitem{display:block;width:100%;text-align:left;padding:16px;border-radius:9px;font-size:16px}
+.menuitem:active{background:#333}
+#player{display:none;position:fixed;inset:0;background:#0f0f0f;z-index:8;overflow:auto}
+#player iframe{width:100%;aspect-ratio:16/9;border:0}
+#player h3{padding:10px 15px}
+#player button{padding:12px}
+#status{text-align:center;color:#aaa;padding:25px}
+@media(min-width:700px){
+#videos{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
 
 <header>
- <div class="logo">🎵 Music Hub</div>
- <button class="primary" onclick="startVoice()">🎙 Voice Search</button>
+<button onclick="openMenu()">☰</button>
+<div id="search">
+<input id="query" placeholder="Search" onkeydown="if(event.key==='Enter')searchVideos()">
+<button onclick="searchVideos()">⌕</button>
+</div>
 </header>
 
-<nav>
- <button class="active" onclick="showPage('home',this)">🏠 Home</button>
- <button onclick="showPage('music',this)">🎵 My Music</button>
- <button onclick="showPage('online',this)">🌐 Online Music</button>
- <button onclick="showPage('videos',this)">🎬 Videos</button>
- <button onclick="showPage('downloads',this)">⬇ Downloads</button>
-</nav>
+<div id="videos"></div>
+<div id="status">Loading videos...</div>
 
-<main>
-<section id="home" class="page show">
- <div class="hero">
-  <p>Welcome to</p>
-  <h1>Music Hub</h1>
-  <p>Your Ultimate Music Experience</p>
-  <button onclick="showPage('music')">▶ Play Music</button>
-  <button onclick="showPage('downloads')">⬇ Downloads</button>
-  <button onclick="startVoice()">🎙 Voice Search</button>
- </div>
-
- <div class="section">
-  <h2>Quick Actions</h2>
-  <div class="cards">
-   <div class="card" onclick="showPage('music')"><div class="emoji">🎵</div>Phone Music<p>Play local songs</p></div>
-   <div class="card" onclick="showPage('downloads')"><div class="emoji">📁</div>Downloads<p>Select downloaded songs</p></div>
-   <div class="card" onclick="showPage('online')"><div class="emoji">🌐</div>Online Music<p>Search songs</p></div>
-   <div class="card" onclick="showPage('videos')"><div class="emoji">🎬</div>Video Player<p>Search videos</p></div>
-   <div class="card" onclick="startVoice()"><div class="emoji">🎙</div>Voice Search<p>Search by voice</p></div>
-  </div>
- </div>
-
- <div class="section panel">
-  <h2>Search Music</h2>
-  <input id="homeSearch" placeholder="Search songs or artists...">
-  <button class="primary" onclick="searchOnline('homeSearch')">Search</button>
- </div>
-</section>
-
-<section id="music" class="page">
- <div class="section">
-  <h2>🎵 My Music</h2>
-  <p class="note">Choose audio files from your phone to play them here.</p>
-  <button class="primary" onclick="document.getElementById('musicFiles').click()">＋ Choose Music Files</button>
-  <input id="musicFiles" type="file" accept="audio/*" multiple hidden onchange="loadFiles(this)">
-  <div id="musicList" class="panel">No songs selected yet.</div>
- </div>
-</section>
-
-<section id="downloads" class="page">
- <div class="section">
-  <h2>⬇ Downloads</h2>
-  <p class="note">Select music files from your phone's Downloads folder using the file picker.</p>
-  <button class="primary" onclick="document.getElementById('downloadFiles').click()">📁 Browse Downloads</button>
-  <input id="downloadFiles" type="file" accept="audio/*" multiple hidden onchange="loadFiles(this)">
-  <div id="downloadList" class="panel">No downloaded songs selected.</div>
- </div>
-</section>
-
-<section id="online" class="page">
- <div class="section">
-  <h2>🌐 Online Music Search</h2>
-  <input id="onlineSearch" placeholder="Enter song or artist name">
-  <button class="primary" onclick="searchOnline('onlineSearch')">Search Online</button>
-  <div id="onlineResults" class="panel">Search for a song to find it online.</div>
-  <p class="note">Online results open YouTube. Music availability and playback are controlled by the source website.</p>
- </div>
-</section>
-
-<section id="videos" class="page">
- <div class="section">
-  <h2>🎬 Video Search</h2>
-  <input id="videoSearch" placeholder="Search videos">
-  <button class="primary" onclick="searchVideos()">Search Videos</button>
-  <div id="videoResults" class="panel">Search for videos online.</div>
- </div>
-</section>
-
-<div class="player">
- <div id="nowPlaying">🎵 No song playing</div>
- <audio id="audio" controls style="width:100%;margin-top:10px"></audio>
- <div class="player-controls">
-  <button onclick="previousSong()">⏮</button>
-  <button class="primary" onclick="togglePlay()">▶ / ⏸</button>
-  <button onclick="nextSong()">⏭</button>
- </div>
- <p class="note">Music Hub Player</p>
+<div id="drawer" onclick="closeMenu()">
+<div id="menu" onclick="event.stopPropagation()">
+<button onclick="closeMenu()" style="margin-bottom:20px">✕</button>
+<button class="menuitem" onclick="home()">⌂ Home</button>
+<button class="menuitem" onclick="showMessage('Music Library')">♫ Music</button>
+<button class="menuitem" onclick="home()">▣ Videos</button>
+<button class="menuitem" onclick="showMessage('Select audio files from your phone to play them.')">↓ Downloads</button>
+<button class="menuitem" onclick="showMessage('Voice search will be available in a supported browser.')">🎙 Voice Search</button>
 </div>
-</main>
+</div>
 
-<footer>Music Hub • Enjoy Your Music</footer>
+<div id="player">
+<button onclick="closePlayer()">← Back</button>
+<div id="frame"></div>
+<h3 id="videoTitle"></h3>
+</div>
 
 <script>
-let songs=[];
-let currentIndex=0;
-const audio=document.getElementById('audio');
+const API_KEY =  AIzaSyBJ3zN1ntsSefo_LU3DONVlsGKD2GbWkLQ
 
-function showPage(id,btn){
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));
- document.getElementById(id).classList.add('show');
- document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
- if(btn)btn.classList.add('active');
+const videos = document.getElementById('videos');
+const statusBox = document.getElementById('status');
+
+function openMenu(){
+ document.getElementById('drawer').style.display='block';
+}
+function closeMenu(){
+ document.getElementById('drawer').style.display='none';
+}
+function showMessage(message){
+ closeMenu();
+ alert(message);
+}
+function home(){
+ closeMenu();
+ loadTrending();
+}
+function showStatus(message){
+ statusBox.textContent=message;
+ statusBox.style.display='block';
 }
 
-function loadFiles(input){
- const files=Array.from(input.files||[]);
- files.forEach(file=>{
-  if(!file.type.startsWith('audio/'))return;
-  songs.push({name:file.name,url:URL.createObjectURL(file)});
+async function loadTrending(){
+ videos.innerHTML='';
+ showStatus('Loading videos...');
+ if(API_KEY.includes('PASTE_YOUR')){
+  showStatus('Add your YouTube API key to load videos.');
+  return;
+ }
+ try{
+  const url='https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&regionCode=IN&videoCategoryId=10&maxResults=30&key='+API_KEY;
+  const response=await fetch(url);
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error?.message||'YouTube API error');
+  displayVideos(data.items||[]);
+ }catch(error){
+  showStatus('Could not load videos. Check API key and internet connection.');
+ }
+}
+
+async function searchVideos(){
+ const q=document.getElementById('query').value.trim();
+ if(!q)return;
+ videos.innerHTML='';
+ showStatus('Searching...');
+ try{
+  const url='https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&regionCode=IN&order=relevance&maxResults=25&q='+encodeURIComponent(q)+'&key='+API_KEY;
+  const response=await fetch(url);
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.error?.message||'Search error');
+  const items=(data.items||[]).filter(v=>v.id.videoId).map(v=>({
+   id:v.id.videoId,
+   snippet:v.snippet
+  }));
+  displayVideos(items);
+ }catch(error){
+  showStatus('Search failed. Check API key and internet connection.');
+ }
+}
+
+function displayVideos(items){
+ videos.innerHTML='';
+ if(!items.length){
+  showStatus('No videos found.');
+  return;
+ }
+ statusBox.style.display='none';
+ items.forEach(item=>{
+  const id=typeof item.id==='string'?item.id:item.id.videoId;
+  const s=item.snippet;
+  const thumb=s.thumbnails?.high?.url||s.thumbnails?.medium?.url||s.thumbnails?.default?.url;
+  const card=document.createElement('div');
+  card.className='video';
+  const img=document.createElement('img');
+  img.className='thumb';
+  img.src=thumb||'';
+  img.alt='';
+  const details=document.createElement('div');
+  details.className='details';
+  const avatar=document.createElement('div');
+  avatar.className='channel';
+  const info=document.createElement('div');
+  info.className='info';
+  const title=document.createElement('strong');
+  title.textContent=s.title;
+  const channel=document.createElement('small');
+  channel.textContent=s.channelTitle||'';
+  info.append(title,channel);
+  const more=document.createElement('button');
+  more.className='more';
+  more.textContent='⋮';
+  more.onclick=e=>{
+   e.stopPropagation();
+   alert('Download is available only for videos whose owner provides an authorized download option.');
+  };
+  details.append(avatar,info,more);
+  card.append(img,details);
+  card.onclick=()=>playVideo(id,s.title);
+  videos.append(card);
  });
- renderSongs();
- if(files.length)showPage('music');
- input.value='';
 }
 
-function renderSongs(){
- const list=document.getElementById('musicList');
- const downloads=document.getElementById('downloadList');
- if(!songs.length){
-  list.textContent='No songs selected yet.';
-  downloads.textContent='No downloaded songs selected.';
-  return;
- }
- let html=songs.map((s,i)=>`
- <div class="track">
-  <div class="cover">🎵</div>
-  <div class="info"><strong>${escapeHTML(s.name)}</strong><br><small>Local Music</small></div>
-  <button onclick="playSong(${i})">▶</button>
- </div>`).join('');
- list.innerHTML=html;
- downloads.innerHTML=html;
+function playVideo(id,title){
+ document.getElementById('player').style.display='block';
+ document.getElementById('videoTitle').textContent=title;
+ document.getElementById('frame').innerHTML=
+ '<iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?autoplay=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
 }
-
-function escapeHTML(text){
- return text.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function closePlayer(){
+ document.getElementById('player').style.display='none';
+ document.getElementById('frame').innerHTML='';
 }
-
-function playSong(i){
- if(!songs.length)return;
- currentIndex=i;
- audio.src=songs[i].url;
- document.getElementById('nowPlaying').textContent='🎵 '+songs[i].name;
- audio.play().catch(()=>alert('Tap Play to start the song.'));
-}
-
-function togglePlay(){
- if(!audio.src){
-  alert('Please choose a song first.');
-  return;
- }
- if(audio.paused)audio.play();
- else audio.pause();
-}
-
-function nextSong(){
- if(!songs.length)return;
- playSong((currentIndex+1)%songs.length);
-}
-
-function previousSong(){
- if(!songs.length)return;
- playSong((currentIndex-1+songs.length)%songs.length);
-}
-
-audio.addEventListener('ended',nextSong);
-
-function searchOnline(id){
- const q=document.getElementById(id).value.trim();
- if(!q){alert('Enter a song name first.');return;}
- const url='https://www.youtube.com/results?search_query='+encodeURIComponent(q);
- document.getElementById('onlineResults').innerHTML=
- '<a class="result" href="'+url+'" target="_blank">🔎 Search "'+escapeHTML(q)+'" on YouTube ↗</a>';
- showPage('online');
-}
-
-function searchVideos(){
- const q=document.getElementById('videoSearch').value.trim();
- if(!q){alert('Enter a video name first.');return;}
- const url='https://www.youtube.com/results?search_query='+encodeURIComponent(q);
- document.getElementById('videoResults').innerHTML=
- '<a class="result" href="'+url+'" target="_blank">🎬 Watch "'+escapeHTML(q)+'" on YouTube ↗</a>';
-}
-
-function startVoice(){
- const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SpeechRecognition){
-  alert('Voice search is not supported in this browser. Please use text search.');
-  return;
- }
- const recognition=new SpeechRecognition();
- recognition.lang='en-IN';
- recognition.onresult=e=>{
-  const text=e.results[0][0].transcript;
-  document.getElementById('homeSearch').value=text;
-  showPage('home');
-  searchOnline('homeSearch');
- };
- recognition.onerror=()=>alert('Voice search could not start. Please try again.');
- recognition.start();
-}
+loadTrending();
 </script>
 </body>
 </html>
